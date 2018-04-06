@@ -285,7 +285,8 @@ func (e *DateTimeField) Set(d time.Time) {
 
 // String return the time's String
 func (e *DateTimeField) String() string {
-	return e.Value().String()
+	//return e.Value().String()
+	return e.Value().Format(formatDateTime)
 }
 
 // FieldType return the enum TypeDateTimeField
@@ -313,6 +314,20 @@ func (e *DateTimeField) SetRaw(value interface{}) error {
 // RawValue return the datetime value
 func (e *DateTimeField) RawValue() interface{} {
 	return e.Value()
+}
+
+func (t *DateTimeField) UnmarshalJSON(data []byte) (err error) {
+	now, err := time.ParseInLocation(`"`+formatDateTime+`"`, string(data), time.Local)
+	*t = DateTimeField(now)
+	return
+}
+
+func (t DateTimeField) MarshalJSON() ([]byte, error) {
+	b := make([]byte, 0, len(formatDateTime)+2)
+	b = append(b, '"')
+	b = time.Time(t).AppendFormat(b, formatDateTime)
+	b = append(b, '"')
+	return b, nil
 }
 
 // verify datetime implement fielder
